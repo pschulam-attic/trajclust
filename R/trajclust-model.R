@@ -6,7 +6,7 @@
 #' @param covariance A function to compute covariance matrices.
 #'
 #' @export
-new_trajclust_model <- function(k, p, basis, covariance)
+new_trajclust_model <- function(k, p, basis, covariance, bmean=1, bcov=1)
 {
   model <- structure(list(), class="trajclust")
   model$num_groups <- k
@@ -15,6 +15,8 @@ new_trajclust_model <- function(k, p, basis, covariance)
   model$beta <- matrix(NA, p, k)
   model$basis <- basis
   model$covariance <- covariance
+  model$bmean <- bmean
+  model$bcov <- bcov
   model
 }
 
