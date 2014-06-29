@@ -49,7 +49,7 @@ init_trajclust_model <- function(curveset, model)
 
   for (i in 1:model$num_groups)
   {
-    curve <- sample(curveset, 1)
+    curve <- sample(curveset$curves, 1)[[1]]
     X <- model$basis(curve$x)
     y <- curve$y
     A <- crossprod(X) + diag(1e-2, ncol(X))
@@ -68,17 +68,40 @@ init_trajclust_model <- function(curveset, model)
 #' @export
 trajclust_mle <- function(model, ss)
 {
-  total_theta <- sum(ss$theta_suffstats)
-  model$theta <- ss$theta_suffstats / total_theta
+  alpha <- 10
+  fudge <- 1e-2
+  
+  total_theta <- sum(ss$theta_suffstats) + alpha*model$num_groups
+  model$theta <- (ss$theta_suffstats + alpha) / total_theta
 
   for (i in 1:model$num_groups)
   {
-    eta1 <- ss$beta_eta1[, , i]
+    eta1 <- ss$beta_eta1[, , i] + diag(fudge, model$num_basis)
     eta2 <- ss$beta_eta2[, i]
     model$beta[, i] <- solve(eta1, eta2)
   }
 
   model
+}
+
+#' Create a new polynomial basis.
+#'
+#' @param degree
+#'
+#' @export
+polynomial_basis <- function(degree)
+{
+  basis <- function(x)
+  {
+    powers <- seq(0, degree)
+    X <- matrix(0, length(x), length(powers))
+    for (i in 1:length(powers))
+        X[, i] <- x^powers[i]
+
+    X
+  }
+
+  basis
 }
 
 #' Create a new B-spline basis.
@@ -112,6 +135,21 @@ bspline_basis <- function(xrange, nbasis, intercept, degree=3)
   }
 
   basis
+}
+
+#' Create a new diagonal covariance function.
+#'
+#' @param noise The square root of the measurement variance.
+#'
+#' @export
+diagonal_covariance <- function(noise)
+{
+  covariance <- function(x)
+  {
+    diag(noise^2, length(x))
+  }
+
+  covariance
 }
 
 #' Create a new squared exponential covariance function.

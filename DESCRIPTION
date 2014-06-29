@@ -9,4 +9,5 @@ Depends:
 License: MIT
 LazyData: true
 Imports:
-    mvtnorm
+    mvtnorm,
+    ggplot2

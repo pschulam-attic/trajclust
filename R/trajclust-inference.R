@@ -21,3 +21,30 @@ trajclust_inference <- function(X, y, K, model)
   z <- exp(z - likelihood)
   list(z=z, likelihood=likelihood)
 }
+
+#' Use a trained model to infer groups and compute likelihood.
+#'
+#' @param curveset A collection of curves to evaluate.
+#' @param model A trained trajclust model.
+#'
+#' @export
+trajclust_full_inference <- function(curveset, model)
+{
+  likelihood <- 0
+  z <- matrix(NA, curveset$num_curves, model$num_groups)
+  i <- 0
+
+  for (curve in curveset$curves)
+  {
+    i <- i + 1
+    X <- model$basis(curve$x)
+    y <- curve$y
+    K <- model$covariance(curve$x)
+    inf <- trajclust_inference(X, y, K, model)
+
+    z[i, ] <- inf$z
+    likelihood <- likelihood + inf$likelihood
+  }
+
+  list(z=z, likelihood=likelihood)
+}
