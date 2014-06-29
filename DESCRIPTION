@@ -1,0 +1,12 @@
+Package: trajclust
+Title: Cluster trajectories.
+Version: 0.1
+Authors@R: person("Peter", "Schulam", role=c("aut", "cre"),
+    email="pschulam@gmail.com")
+Description: Cluster trajectories.
+Depends:
+    R (>= 3.1.0)
+License: MIT
+LazyData: true
+Imports:
+    mvtnorm
