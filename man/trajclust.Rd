@@ -4,7 +4,34 @@
 \alias{trajclust}
 \alias{trajclust-package}
 \title{trajclust.}
+\usage{
+trajclust(x, y, id, ngroups, xrange = range(x), nbasis, amp, bw, noise,
+  seed = 1)
+}
+\arguments{
+\item{x}{A vector of measurement times.}
+
+\item{y}{A vector of measurement values.}
+
+\item{id}{A vector of trajectory IDs for each (x, y) pair.}
+
+\item{ngroups}{The number of clusters to estimate.}
+
+\item{xrange}{The lower and upper bounds of the measurement times.}
+
+\item{nbasis}{The number of basis functions to use.}
+
+\item{amp}{The amplitude of the correlation model.}
+
+\item{bw}{The bandwidth of the correlation model.}
+
+\item{noise}{The observation standard deviation.}
+
+\item{seed}{A random seed for reproducibility.}
+}
 \description{
 trajclust.
+
+Cluster trajectories.
 }
 
