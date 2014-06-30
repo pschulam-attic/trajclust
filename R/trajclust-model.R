@@ -1,26 +1,26 @@
 #' Create an empty trajclust model.
 #'
-#' @param k The number of clusters.
-#' @param p The number of basis functions.
+#' @param G The number of clusters.
+#' @param P The number of basis functions.
 #' @param basis A function to compute design matrices.
 #' @param covariance A function to compute covariance matrices.
 #' @param bmean Individual offset prior mean.
 #' @param bcov Individual offset prior cov.
 #'
 #' @export
-new_trajclust_model <- function(k, p, basis, covariance, bmean=NULL, bcov=NULL)
+new_trajclust_model <- function(G, P, basis, covariance, bmean=NULL, bcov=NULL)
 {
   if (is.null(bmean))
-      bmean <- rep(0, p)
+    bmean <- rep(0, P)
 
   if (is.null(bcov))
-      bcov <- diag(1, p)
+    bcov <- diag(1e-3, P)
   
   model <- structure(list(), class="trajclust")
-  model$num_groups <- k
-  model$num_basis  <- p
-  model$theta <- numeric(k)
-  model$beta <- matrix(NA, p, k)
+  model$num_groups <- G
+  model$num_basis  <- P
+  model$theta <- numeric(G)
+  model$beta <- matrix(NA, P, G)
   model$basis <- basis
   model$covariance <- covariance
   model$bmean <- bmean
@@ -35,13 +35,13 @@ new_trajclust_model <- function(k, p, basis, covariance, bmean=NULL, bcov=NULL)
 #' @export
 new_trajclust_suffstats <- function(model)
 {
-  k <- model$num_groups
-  p <- model$num_basis
+  G <- model$num_groups
+  P <- model$num_basis
   
   ss <- structure(list(), class="trajclust_ss")
-  ss$theta_suffstats <- numeric(k)
-  ss$beta_eta1 <- array(0, c(p, p, k))
-  ss$beta_eta2 <- array(0, c(p, k))
+  ss$theta_suffstats <- numeric(G)
+  ss$beta_eta1 <- array(0, c(P, P, G))
+  ss$beta_eta2 <- array(0, c(P, G))
 
   ss
 }
@@ -78,10 +78,10 @@ init_trajclust_model <- function(curveset, model)
 #' @export
 trajclust_mle <- function(model, ss)
 {
-  alpha <- 1
-  fudge <- 1e-2
+  alpha <- 1     # Pseudo-counts for group probabilities.
+  fudge <- 1e-2  # Diagonal value to prevent singular matrices.
   
-  total_theta <- sum(ss$theta_suffstats) + alpha*model$num_groups
+  total_theta <- sum(ss$theta_suffstats) + alpha * model$num_groups
   model$theta <- (ss$theta_suffstats + alpha) / total_theta
 
   for (i in 1:model$num_groups)

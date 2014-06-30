@@ -46,6 +46,7 @@ trajclust_var_inference <- function(X, x, y, K, model, tol=1e-8)
   projection <- t(Xb) %*% Ki %*% yb
 
   # Initialize variational distributions; var_bcov is constant.
+  
   var_z <- numeric(model$num_groups)
   var_bmean <- numeric(2)
   var_bcov <- model$bcov
@@ -54,7 +55,7 @@ trajclust_var_inference <- function(X, x, y, K, model, tol=1e-8)
   {
     iter <- iter + 1
 
-    # Update var_z
+    # Update var_z.
 
     ebsq <- var_bcov + var_bmean %*% t(var_bmean)
 
@@ -70,7 +71,7 @@ trajclust_var_inference <- function(X, x, y, K, model, tol=1e-8)
     }
     var_z <- exp(var_z - logsumexp(var_z))
 
-    # Update bmean var_bmean
+    # Update var_bmean.
 
     var_bmean <- solve(model$bcov) %*% model$bmean
 
@@ -82,14 +83,12 @@ trajclust_var_inference <- function(X, x, y, K, model, tol=1e-8)
 
     var_bmean <- solve(solve(var_bcov) + precision, var_bmean)
 
-    likelihood <- trajclust_elbo(X, x, y, K, var_z, var_bmean,
-                                 var_bcov, model)
+    likelihood <- trajclust_elbo(X, x, y, K, var_z, var_bmean, var_bcov, model)
 
     convergence <- (likelihood_old - likelihood) / likelihood_old
     likelihood_old <- likelihood
 
-    ## msg(sprintf("elbo=%.2f, convergence=%.8f",
-    ##             likelihood, convergence))
+    ## msg(sprintf("elbo=%.2f, convergence=%.8f", likelihood, convergence))
   }
 
   list(z=var_z, bmean=var_bmean, bcov=var_bcov, likelihood=likelihood)
@@ -171,4 +170,35 @@ trajclust_full_inference <- function(curveset, model)
   }
 
   list(z=z, likelihood=likelihood)
+}
+
+#' Use a trained model to infer groups and offsets and compute
+#' likelihood.
+#'
+#' @param curveset A collection of curves to evaluate.
+#' @param model A trained trajclust model.
+#'
+#' @export
+trajclust_full_var_inference <- function(curveset, model)
+{
+  likelihood <- 0
+  z <- matrix(NA, curveset$num_curves, model$num_groups)
+  bmean <- matrix(NA, curveset$num_curves, 2)
+  i <- 0
+
+  for (curve in curveset$curves)
+  {
+    i <- i + 1
+    X <- model$basis(curve$x)
+    x <- curve$x
+    y <- curve$y
+    K <- model$covariance(curve$x)
+    inf <- trajclust_var_inference(X, x, y, K, model)
+
+    z[i, ] <- inf$z
+    bmean[i, ] <- inf$bmean
+    likelihood <- likelihood + inf$likelihood
+  }
+
+  list(z=z, bmean=bmean, likelihood=likelihood)
 }

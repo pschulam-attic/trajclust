@@ -3,12 +3,12 @@
 \alias{new_trajclust_model}
 \title{Create an empty trajclust model.}
 \usage{
-new_trajclust_model(k, p, basis, covariance, bmean = NULL, bcov = NULL)
+new_trajclust_model(G, P, basis, covariance, bmean = NULL, bcov = NULL)
 }
 \arguments{
-\item{k}{The number of clusters.}
+\item{G}{The number of clusters.}
 
-\item{p}{The number of basis functions.}
+\item{P}{The number of basis functions.}
 
 \item{basis}{A function to compute design matrices.}
 

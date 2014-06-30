@@ -81,44 +81,44 @@ curve_e_step <- function(curve, model, ss)
 #' @export
 run_var_em <- function(curveset, model, tol=1e-8)
 {
+  # Record information about training data.
+  
+  model$train_info <- list()
+  model$train_info$xrange <- curveset$xrange
+  model$train_info$yrange <- curveset$yrange
+
+  # Initialize iteration variables.
+  
   iter <- 0
   convergence <- 1
   likelihood_old <- 0
 
   while (convergence > tol)
   {
+    # Initialize iteration.
+    
     iter <- iter + 1
-    p <- plot(model, seq(0, 15, length=100)) + ggplot2::ylim(-1.5, 1.5)
-    pfile <- sprintf("plot-%03d.pdf", iter)
-    ggplot2::ggsave(pfile, p)
-
     likelihood <- 0
     ss <- new_trajclust_suffstats(model)
 
-    all_z <- matrix(NA, curveset$num_curves, model$num_groups)
-    all_bmean <- matrix(NA, curveset$num_curves, 2)
-    curve_ix <- 0
+    # Collect sufficient statistics and likelihood for each curve.
 
     for (curve in curveset$curves)
     {
       estep <- curve_var_e_step(curve, model, ss)
       ss <- estep$ss
       likelihood <- likelihood + estep$likelihood
-      curve_ix <- curve_ix + 1
-      all_z[curve_ix, ] <- estep$z
-      all_bmean[curve_ix, ] <- estep$bmean
     }
 
+    # Use sufficient statistics to compute trajclust MLE.
+    
     model <- trajclust_mle(model, ss)
-    capture.output(print(model), file=sprintf("trajclust-%03d.txt", iter))
-    capture.output(print(list(z=all_z, bmean=all_bmean)),
-                   file=sprintf("inference-%03d.txt", iter))
+
+    # Update convergence criterion.
 
     convergence <- (likelihood_old - likelihood) / likelihood_old
     likelihood_old <- likelihood
-
-    msg(sprintf("likelihood=%.2f, convergence=%.8f",
-                likelihood, convergence))
+    msg(sprintf("likelihood=%.2f, convergence=%.8f", likelihood, convergence))
   }
 
   list(model=model, likelihood=likelihood)
@@ -134,12 +134,19 @@ run_var_em <- function(curveset, model, tol=1e-8)
 #' @export
 curve_var_e_step <- function(curve, model, ss)
 {
+  # Extract curve observations.
+  
   X <- model$basis(curve$x)
   x <- curve$x
   y <- curve$y
   K <- model$covariance(curve$x)
+
+  # Compute posterior over latent variables.
+  
   inf <- trajclust_var_inference(X, x, y, K, model)
   likelihood <- inf$likelihood
+
+  # Update sufficient statistics.
 
   z <- inf$z
   bmean <- inf$bmean

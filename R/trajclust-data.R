@@ -14,6 +14,8 @@ make_curveset <- function(x, y, curve_id)
   curveset$num_curves <- length(curveset$curves)
   curveset$num_points <-
       sum(vapply(curveset$curves, "[[", integer(1), "num_points"))
+  curveset$xrange <- range(x)
+  curveset$yrange <- range(y)
   curveset
 }
 
