@@ -11,10 +11,10 @@
 new_trajclust_model <- function(G, P, basis, covariance, bmean=NULL, bcov=NULL)
 {
   if (is.null(bmean))
-    bmean <- rep(0, P)
+    bmean <- rep(0, 2)
 
   if (is.null(bcov))
-    bcov <- diag(1e-3, P)
+    bcov <- diag(1e-10, 2)
   
   model <- structure(list(), class="trajclust")
   model$num_groups <- G
@@ -52,16 +52,21 @@ new_trajclust_suffstats <- function(model)
 #' @param model A trajclust model.
 #' 
 #' @export
-init_trajclust_model <- function(curveset, model)
+init_trajclust_model <- function(curveset, model, seed)
 {
+  set.seed(seed)
+  
   theta <- runif(model$num_groups)
   model$theta <- theta / sum(theta)
 
+  init_groups <- sample(model$num_groups, curveset$num_curves, TRUE)
+
   for (i in 1:model$num_groups)
   {
-    curve <- sample(curveset$curves, 1)[[1]]
-    X <- model$basis(curve$x)
-    y <- curve$y
+    curves <- curveset$curves[init_groups == i]
+    x <- do.call("c", lapply(curves, "[[", "x"))
+    y <- do.call("c", lapply(curves, "[[", "y"))
+    X <- model$basis(x)
     A <- crossprod(X) + diag(1e-2, ncol(X))
     b <- t(X) %*% y
     model$beta[, i] <- solve(A, b)
