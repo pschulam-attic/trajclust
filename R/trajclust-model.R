@@ -78,7 +78,7 @@ init_trajclust_model <- function(curveset, model)
 #' @export
 trajclust_mle <- function(model, ss)
 {
-  alpha <- 10
+  alpha <- 1
   fudge <- 1e-2
   
   total_theta <- sum(ss$theta_suffstats) + alpha*model$num_groups

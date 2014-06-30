@@ -88,19 +88,31 @@ run_var_em <- function(curveset, model, tol=1e-8)
   while (convergence > tol)
   {
     iter <- iter + 1
+    p <- plot(model, seq(0, 15, length=100)) + ggplot2::ylim(-1.5, 1.5)
+    pfile <- sprintf("plot-%03d.pdf", iter)
+    ggplot2::ggsave(pfile, p)
 
     likelihood <- 0
     ss <- new_trajclust_suffstats(model)
+
+    all_z <- matrix(NA, curveset$num_curves, model$num_groups)
+    all_bmean <- matrix(NA, curveset$num_curves, 2)
+    curve_ix <- 0
 
     for (curve in curveset$curves)
     {
       estep <- curve_var_e_step(curve, model, ss)
       ss <- estep$ss
       likelihood <- likelihood + estep$likelihood
+      curve_ix <- curve_ix + 1
+      all_z[curve_ix, ] <- estep$z
+      all_bmean[curve_ix, ] <- estep$bmean
     }
 
     model <- trajclust_mle(model, ss)
     capture.output(print(model), file=sprintf("trajclust-%03d.txt", iter))
+    capture.output(print(list(z=all_z, bmean=all_bmean)),
+                   file=sprintf("inference-%03d.txt", iter))
 
     convergence <- (likelihood_old - likelihood) / likelihood_old
     likelihood_old <- likelihood
@@ -143,5 +155,5 @@ curve_var_e_step <- function(curve, model, ss)
     ss$beta_eta2[, i] <- ss$beta_eta2[, i] + z[i] * eta2
   }
 
-  list(ss=ss, likelihood=likelihood)
+  list(ss=ss, likelihood=likelihood, z=z, bmean=bmean)
 }

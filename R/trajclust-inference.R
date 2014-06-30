@@ -38,32 +38,34 @@ trajclust_var_inference <- function(X, x, y, K, model, tol=1e-8)
   convergence <- 1
   likelihood_old <- 0
 
+  n <- length(x)
   Xb <- cbind(1, x)
   Ki <- solve(K)
+  yb <- y - X %*% model$beta
   precision <- t(Xb) %*% Ki %*% Xb
-  projection <- t(y - X %*% model$beta) %*% Ki %*% Xb
+  projection <- t(Xb) %*% Ki %*% yb
 
   # Initialize variational distributions; var_bcov is constant.
-  var_z <- runif(model$num_groups)
-  var_z <- var_z / sum(var_z)
-  var_bmean <- rnorm(2, sd=0.1)
+  var_z <- numeric(model$num_groups)
+  var_bmean <- numeric(2)
   var_bcov <- model$bcov
 
   while (convergence > tol)
   {
     iter <- iter + 1
 
-    likelihood <- trajclust_elbo(X, x, y, K, var_z, var_bmean,
-                                 var_bcov, model)
-
     # Update var_z
 
-    exp_outer <- var_bcov + var_bmean %*% t(var_bmean)
+    ebsq <- var_bcov + var_bmean %*% t(var_bmean)
 
     for (i in 1:model$num_groups)
     {
       zi <- safe_log(model$theta[i])
-      zi <- zi - projection[i, ] %*% var_bmean
+      zi <- zi - n/2 * log(2*pi)
+      zi <- zi - 1/2 * log(det(K))
+      zi <- zi - 1/2 * yb[, i] %*% Ki %*% yb[, i]
+      zi <- zi - 1/2 * sum(diag(t(Xb) %*% Ki %*% Xb %*% ebsq))
+      zi <- zi + projection[, i] %*% var_bmean
       var_z[i] <- zi
     }
     var_z <- exp(var_z - logsumexp(var_z))
@@ -75,10 +77,13 @@ trajclust_var_inference <- function(X, x, y, K, model, tol=1e-8)
     for (i in 1:model$num_groups)
     {
       zi <- var_z[i]
-      var_bmean <- var_bmean + zi*projection[i, ]
+      var_bmean <- var_bmean + zi*projection[, i]
     }
 
     var_bmean <- solve(solve(var_bcov) + precision, var_bmean)
+
+    likelihood <- trajclust_elbo(X, x, y, K, var_z, var_bmean,
+                                 var_bcov, model)
 
     convergence <- (likelihood_old - likelihood) / likelihood_old
     likelihood_old <- likelihood
@@ -115,12 +120,12 @@ trajclust_elbo <- function(X, x, y, K, var_z, var_bmean, var_bcov, model)
   likelihood <- likelihood - 1/2*log(det(model$bcov))
   likelihood <- likelihood - 1/2*t(model$bmean) %*% bcovi %*% model$bmean
   likelihood <- likelihood - 1/2*sum(diag(bcovi %*% exp_outer))
-  likelihood <- likelihood - t(model$bmean) %*% bcovi %*% var_bmean
+  likelihood <- likelihood + t(model$bmean) %*% bcovi %*% var_bmean
   likelihood <- likelihood + mvn_entropy(var_bcov)
 
   # E[prior(z)] + H(var(z))
   likelihood <- likelihood + sum(var_z * safe_log(model$theta))
-  likelihood <- likelihood + mult_entropy(var_z)
+  likelihood <- likelihood - sum(var_z * safe_log(var_z))
 
   # E[likelihood(y)]
   likelihood <- likelihood - n/2*log(2*pi)
