@@ -3,7 +3,7 @@
 \alias{run_em}
 \title{Run EM to fit the trajclust model.}
 \usage{
-run_em(curveset, model, tol = 1e-04)
+run_em(curveset, model, tol = 1e-08)
 }
 \arguments{
 \item{curveset}{A collection of observed curves.}

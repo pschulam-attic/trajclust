@@ -3,7 +3,7 @@
 \alias{new_trajclust_model}
 \title{Create an empty trajclust model.}
 \usage{
-new_trajclust_model(k, p, basis, covariance)
+new_trajclust_model(k, p, basis, covariance, bmean = NULL, bcov = NULL)
 }
 \arguments{
 \item{k}{The number of clusters.}
@@ -13,6 +13,10 @@ new_trajclust_model(k, p, basis, covariance)
 \item{basis}{A function to compute design matrices.}
 
 \item{covariance}{A function to compute covariance matrices.}
+
+\item{bmean}{Individual offset prior mean.}
+
+\item{bcov}{Individual offset prior cov.}
 }
 \description{
 Create an empty trajclust model.

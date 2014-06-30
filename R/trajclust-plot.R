@@ -8,7 +8,7 @@ plot.trajclust <- function(model, x)
   trajs <- data.frame(x=x, y=as.numeric(y), group=rep(group, each=n))
 
   p <- ggplot2::ggplot(trajs)
-  p <- p + ggplot2::geom_line(aes(x, y, color=group))
-  p <- p + facet_wrap(~ group)
+  p <- p + ggplot2::geom_line(ggplot2::aes(x, y, color=group))
+  p <- p + ggplot2::facet_wrap(~ group)
   p
 }

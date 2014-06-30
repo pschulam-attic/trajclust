@@ -6,7 +6,7 @@
 polynomial_basis(degree)
 }
 \arguments{
-\item{degree}{}
+\item{degree}{Degree of the polynomial.}
 }
 \description{
 Create a new polynomial basis.

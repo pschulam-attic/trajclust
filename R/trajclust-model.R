@@ -4,10 +4,18 @@
 #' @param p The number of basis functions.
 #' @param basis A function to compute design matrices.
 #' @param covariance A function to compute covariance matrices.
+#' @param bmean Individual offset prior mean.
+#' @param bcov Individual offset prior cov.
 #'
 #' @export
-new_trajclust_model <- function(k, p, basis, covariance, bmean=1, bcov=1)
+new_trajclust_model <- function(k, p, basis, covariance, bmean=NULL, bcov=NULL)
 {
+  if (is.null(bmean))
+      bmean <- rep(0, p)
+
+  if (is.null(bcov))
+      bcov <- diag(1, p)
+  
   model <- structure(list(), class="trajclust")
   model$num_groups <- k
   model$num_basis  <- p
@@ -88,7 +96,7 @@ trajclust_mle <- function(model, ss)
 
 #' Create a new polynomial basis.
 #'
-#' @param degree
+#' @param degree Degree of the polynomial.
 #'
 #' @export
 polynomial_basis <- function(degree)

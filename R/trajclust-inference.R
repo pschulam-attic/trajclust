@@ -14,7 +14,7 @@ trajclust_inference <- function(X, y, K, model)
   {
     yhat <- X %*% model$beta[, i]
     z[i] <- mvtnorm::dmvnorm(y, yhat, K, log=TRUE)
-    z[i] <- z[i] + log(model$theta[i])
+    z[i] <- z[i] + safe_log(model$theta[i])
   }
 
   likelihood <- logsumexp(z)
@@ -22,6 +22,16 @@ trajclust_inference <- function(X, y, K, model)
   list(z=z, likelihood=likelihood)
 }
 
+#' Compute posterior group and offset for a curve.
+#'
+#' @param X A design matrix for the curve.
+#' @param x The measurement times for the curve.
+#' @param y The observed measurements for the curve.
+#' @param K The measurement covariance matrix.
+#' @param model A trajclust model.
+#' @param tol Convergence tolerance for variational inference.
+#'
+#' @export
 trajclust_var_inference <- function(X, x, y, K, model, tol=1e-8)
 {
   iter <- 0
@@ -33,10 +43,11 @@ trajclust_var_inference <- function(X, x, y, K, model, tol=1e-8)
   precision <- t(Xb) %*% Ki %*% Xb
   projection <- t(y - X %*% model$beta) %*% Ki %*% Xb
 
-  # Initialize variational distributions
-  var_z <- rep(1, model$num_groups) / model$num_groups
-  var_bmean <- model$bmean
-  var_bcov <- mdoel$bcov
+  # Initialize variational distributions; var_bcov is constant.
+  var_z <- runif(model$num_groups)
+  var_z <- var_z / sum(var_z)
+  var_bmean <- rnorm(2, sd=0.1)
+  var_bcov <- model$bcov
 
   while (convergence > tol)
   {
@@ -45,38 +56,38 @@ trajclust_var_inference <- function(X, x, y, K, model, tol=1e-8)
     likelihood <- trajclust_elbo(X, x, y, K, var_z, var_bmean,
                                  var_bcov, model)
 
-    # Update z_var
+    # Update var_z
 
     exp_outer <- var_bcov + var_bmean %*% t(var_bmean)
-    
+
     for (i in 1:model$num_groups)
     {
-      zi <- log(model$theta[i])
-      zi <- zi - 1/2*sum(diag(precision %*% exp_outer))
-      zi <- zi - projection[, i] %*% var_bmean
-      z_var[i] <- zi
+      zi <- safe_log(model$theta[i])
+      zi <- zi - projection[i, ] %*% var_bmean
+      var_z[i] <- zi
     }
-    z_var <- z_var / sum(z_var)
+    var_z <- exp(var_z - logsumexp(var_z))
 
-    # Update bmean var_bmean and var_bcov
+    # Update bmean var_bmean
 
-    var_bcov <- solve(solve(model$bcov + precision))
     var_bmean <- solve(model$bcov) %*% model$bmean
 
     for (i in 1:model$num_groups)
     {
-      zi <- z_var[i]
-      var_bmean <- var_bmean + zi*projection[, i]
+      zi <- var_z[i]
+      var_bmean <- var_bmean + zi*projection[i, ]
     }
 
-    var_bmean <- solve(var_bcov, var_bmean)
+    var_bmean <- solve(solve(var_bcov) + precision, var_bmean)
 
     convergence <- (likelihood_old - likelihood) / likelihood_old
     likelihood_old <- likelihood
 
-    msg(sprintf("elbo=%.2f, convergence=%.8f",
-                likelihood, convergence))
+    ## msg(sprintf("elbo=%.2f, convergence=%.8f",
+    ##             likelihood, convergence))
   }
+
+  list(z=var_z, bmean=var_bmean, bcov=var_bcov, likelihood=likelihood)
 }
 
 #' Compute the ELBO of the trajclust model with the given variational
@@ -108,7 +119,7 @@ trajclust_elbo <- function(X, x, y, K, var_z, var_bmean, var_bcov, model)
   likelihood <- likelihood + mvn_entropy(var_bcov)
 
   # E[prior(z)] + H(var(z))
-  likelihood <- likelihood + sum(var_z * log(model$theta))
+  likelihood <- likelihood + sum(var_z * safe_log(model$theta))
   likelihood <- likelihood + mult_entropy(var_z)
 
   # E[likelihood(y)]

@@ -19,5 +19,14 @@ mvn_entropy <- function(sigma)
 
 mult_entropy <- function(theta)
 {
-  - sum(log(theta))
+  -sum(safe_log(theta))
+}
+
+safe_log <- function(x)
+{
+  is_zero <- x < 1e-40
+  lx <- numeric(length(x))
+  lx[!is_zero] <- log(x[!is_zero])
+  lx[is_zero] <- -1e4
+  lx
 }
