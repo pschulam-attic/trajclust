@@ -79,21 +79,15 @@ curve_e_step <- function(curve, model, ss)
 #' @param tol Convergence tolerance.
 #'
 #' @export
-run_var_em <- function(curveset, model, tol=1e-8)
+run_var_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE)
 {
-  # Record information about training data.
-  
-  model$train_info <- list()
-  model$train_info$xrange <- curveset$xrange
-  model$train_info$yrange <- curveset$yrange
-
   # Initialize iteration variables.
   
   iter <- 0
   convergence <- 1
   likelihood_old <- 0
 
-  while (convergence > tol)
+  while (convergence > tol & iter < maxiter)
   {
     # Initialize iteration.
     
@@ -118,7 +112,10 @@ run_var_em <- function(curveset, model, tol=1e-8)
 
     convergence <- (likelihood_old - likelihood) / likelihood_old
     likelihood_old <- likelihood
-    msg(sprintf("likelihood=%.2f, convergence=%.8f", likelihood, convergence))
+
+    if (verbose)
+        msg(sprintf("iter=%04d, likelihood=%.2f, convergence=%.8f",
+                    iter, likelihood, convergence))
   }
 
   list(model=model, likelihood=likelihood)
