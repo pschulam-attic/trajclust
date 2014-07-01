@@ -46,7 +46,7 @@ trajclust_var_inference <- function(X, x, y, K, model, tol=1e-8)
   projection <- t(Xb) %*% Ki %*% yb
 
   # Initialize variational distributions; var_bcov is constant.
-  
+
   var_z <- numeric(model$num_groups)
   var_bmean <- numeric(2)
   var_bcov <- model$bcov
@@ -85,7 +85,7 @@ trajclust_var_inference <- function(X, x, y, K, model, tol=1e-8)
 
     likelihood <- trajclust_elbo(X, x, y, K, var_z, var_bmean, var_bcov, model)
 
-    convergence <- (likelihood_old - likelihood) / likelihood_old
+    convergence <- abs((likelihood_old - likelihood) / likelihood_old)
     likelihood_old <- likelihood
 
     ## msg(sprintf("elbo=%.2f, convergence=%.8f", likelihood, convergence))

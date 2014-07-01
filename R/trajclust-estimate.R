@@ -10,11 +10,11 @@ run_em <- function(curveset, model, tol=1e-8)
   iter <- 0
   convergence <- 1
   likelihood_old <- 0
-  
+
   while (convergence > tol)
   {
     iter <- iter + 1
-    
+
     likelihood <- 0
     ss <- new_trajclust_suffstats(model)
 
@@ -82,7 +82,7 @@ curve_e_step <- function(curve, model, ss)
 run_var_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE)
 {
   # Initialize iteration variables.
-  
+
   iter <- 0
   convergence <- 1
   likelihood_old <- 0
@@ -90,7 +90,7 @@ run_var_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE)
   while (convergence > tol & iter < maxiter)
   {
     # Initialize iteration.
-    
+
     iter <- iter + 1
     likelihood <- 0
     ss <- new_trajclust_suffstats(model)
@@ -105,12 +105,12 @@ run_var_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE)
     }
 
     # Use sufficient statistics to compute trajclust MLE.
-    
+
     model <- trajclust_mle(model, ss)
 
     # Update convergence criterion.
 
-    convergence <- (likelihood_old - likelihood) / likelihood_old
+    convergence <- abs((likelihood_old - likelihood) / likelihood_old)
     likelihood_old <- likelihood
 
     if (verbose)
@@ -132,14 +132,14 @@ run_var_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE)
 curve_var_e_step <- function(curve, model, ss)
 {
   # Extract curve observations.
-  
+
   X <- model$basis(curve$x)
   x <- curve$x
   y <- curve$y
   K <- model$covariance(curve$x)
 
   # Compute posterior over latent variables.
-  
+
   inf <- trajclust_var_inference(X, x, y, K, model)
   likelihood <- inf$likelihood
 
@@ -147,7 +147,7 @@ curve_var_e_step <- function(curve, model, ss)
 
   z <- inf$z
   bmean <- inf$bmean
-  
+
   A <- t(X) %*% solve(K)
   eta1 <- A %*% X
   eta2 <- A %*% (y - cbind(1, x) %*% bmean)
