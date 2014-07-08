@@ -14,16 +14,17 @@
 #'
 #' @export
 trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
-                      amp, bw, noise, ninit=5, seed=1, verbose=TRUE)
+                      amp, bw, noise, ninit=5, bmean=NULL, bcov=NULL,
+                      seed=1, verbose=TRUE)
 {
   set.seed(seed)
   init_seeds <- sample(100, ninit, replace=FALSE)
-  
+
   curveset <- make_curveset(x, y, id)
   basis <- bspline_basis(xrange, nbasis, TRUE)
-  covariance <- squared_exp_covariance(amp, bw, noise)  
+  covariance <- squared_exp_covariance(amp, bw, noise)
 
-  model <- new_trajclust_model(ngroups, nbasis, basis, covariance)
+  model <- new_trajclust_model(ngroups, nbasis, basis, covariance, bmean, bcov)
   model$train_info <- list()
   model$train_info$xrange <- curveset$xrange
   model$train_info$yrange <- curveset$yrange
@@ -34,7 +35,7 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
   for (i in 1:ninit)
   {
     if (verbose) cat(banner(i), "\n")
-    
+
     s <- init_seeds[i]
     m <- init_trajclust_model(curveset, model, seed=s)
     em <- run_var_em(curveset, m, verbose=verbose)
