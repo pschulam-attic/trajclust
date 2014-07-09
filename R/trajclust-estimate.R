@@ -26,7 +26,7 @@ run_em <- function(curveset, model, tol=1e-8)
     }
 
     model <- trajclust_mle(model, ss)
-    capture.output(print(model), file=sprintf("trajclust-%03d.txt", iter))
+    ## capture.output(print(model), file=sprintf("trajclust-%03d.txt", iter))
 
     convergence <- (likelihood_old - likelihood) / likelihood_old
     likelihood_old <- likelihood
@@ -47,11 +47,16 @@ run_em <- function(curveset, model, tol=1e-8)
 #' @export
 curve_e_step <- function(curve, model, ss)
 {
-  X <- model$basis(curve$x)
+  x <- curve$x
   y <- curve$y
+  X <- model$basis(curve$x)
+  U <- cbind(1, x)
   K <- model$covariance(curve$x)
-  inf <- trajclust_inference(X, y, K, model)
+  inf <- trajclust_inference(X, x, y, K, model)
   likelihood <- inf$likelihood
+
+  z <- inf$z
+  bmean <- inf$bmean
 
   A <- t(X) %*% solve(K)
   eta1 <- A %*% X
@@ -59,10 +64,10 @@ curve_e_step <- function(curve, model, ss)
 
   for (i in 1:model$num_groups)
   {
-    z_i <- inf$z[i]
-    ss$theta_suffstats[i] <- ss$theta_suffstats[i] + z_i
-    ss$beta_eta1[, , i] <- ss$beta_eta1[, , i] + z_i * eta1
-    ss$beta_eta2[, i] <- ss$beta_eta2[, i] + z_i * eta2
+    ss$theta_suffstats[i] <- ss$theta_suffstats[i] + z[i]
+    ss$beta_eta1[, , i] <- ss$beta_eta1[, , i] + z[i] * eta1
+    eta2 <- A %*% (y - U %*% bmean[, i])
+    ss$beta_eta2[, i] <- ss$beta_eta2[, i] + z[i] * eta2
   }
 
   list(ss=ss, likelihood=likelihood)

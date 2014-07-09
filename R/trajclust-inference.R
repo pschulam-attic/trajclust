@@ -1,30 +1,41 @@
 #' Compute posterior for a curve.
 #'
-#' @param X A design matrix for the curve.
+#' @param X The design matrix for the curve.
+#' @param x The measurement times for the curve.
 #' @param y A response vector for the curve.
 #' @param K The covariance matrix of the responses.
 #' @param model A trajclust model.
 #'
 #' @export
-trajclust_inference <- function(X, y, K, model)
+trajclust_inference <- function(X, x, y, K, model)
 {
+  U <- cbind(1, x)
+  Ki <- solve(K)
+
   z <- numeric(model$num_groups)
+  bmean <- matrix(0, length(model$bmean), model$num_groups)
+  bcov <- solve(solve(model$bcov) + t(U) %*% Ki %*% U)
+  bmean_smooth <- solve(model$bcov) %*% model$bmean
+
+  res_mean <- U %*% model$bmean
+  res_cov <- K + U %*% model$bcov %*% t(U)
 
   for (i in 1:length(z))
   {
     yhat <- X %*% model$beta[, i]
-    z[i] <- mvtnorm::dmvnorm(y, yhat, K, log=TRUE)
-    z[i] <- z[i] + safe_log(model$theta[i])
+    z[i] <- log(model$theta[i])
+    z[i] <- z[i] + mvtnorm::dmvnorm(y - yhat, res_mean, res_cov, log=TRUE)
+    bmean[, i] <- bcov %*% (t(U)%*%Ki%*%(y - yhat) + bmean_smooth)
   }
 
   likelihood <- logsumexp(z)
   z <- exp(z - likelihood)
-  list(z=z, likelihood=likelihood)
+  list(z=z, bmean=bmean, likelihood=likelihood)
 }
 
 #' Compute posterior group and offset for a curve.
 #'
-#' @param X A design matrix for the curve.
+#' @param X The design matrix for the curve.
 #' @param x The measurement times for the curve.
 #' @param y The observed measurements for the curve.
 #' @param K The measurement covariance matrix.
