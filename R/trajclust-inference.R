@@ -17,12 +17,12 @@ trajclust_inference <- function(X, x, y, K, model)
   bcov <- solve(solve(model$bcov) + t(U) %*% Ki %*% U)
   bmean_smooth <- solve(model$bcov) %*% model$bmean
 
-  res_mean <- U %*% model$bmean
+  res_mean <- as.numeric(U %*% model$bmean)
   res_cov <- K + U %*% model$bcov %*% t(U)
 
   for (i in 1:length(z))
   {
-    yhat <- X %*% model$beta[, i]
+    yhat <- as.numeric(X %*% model$beta[, i])
     z[i] <- log(model$theta[i])
     z[i] <- z[i] + mvtnorm::dmvnorm(y - yhat, res_mean, res_cov, log=TRUE)
     bmean[, i] <- bcov %*% (t(U)%*%Ki%*%(y - yhat) + bmean_smooth)

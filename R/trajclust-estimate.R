@@ -5,13 +5,13 @@
 #' @param tol Convergence tolerance.
 #'
 #' @export
-run_em <- function(curveset, model, tol=1e-8)
+run_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE)
 {
   iter <- 0
   convergence <- 1
   likelihood_old <- 0
 
-  while (convergence > tol)
+  while (convergence > tol & iter < maxiter)
   {
     iter <- iter + 1
 
@@ -28,11 +28,12 @@ run_em <- function(curveset, model, tol=1e-8)
     model <- trajclust_mle(model, ss)
     ## capture.output(print(model), file=sprintf("trajclust-%03d.txt", iter))
 
-    convergence <- (likelihood_old - likelihood) / likelihood_old
+    convergence <- (likelihood - likelihood_old) / abs(likelihood_old)
     likelihood_old <- likelihood
 
-    msg(sprintf("likelihood=%.2f, convergence=%.8f",
-                likelihood, convergence))
+    if (verbose)
+      msg(sprintf("likelihood=%.2f, convergence=%.8f",
+                  likelihood, convergence))
   }
 
   list(model=model, likelihood=likelihood)
