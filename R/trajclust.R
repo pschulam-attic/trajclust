@@ -38,7 +38,7 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
 
     s <- init_seeds[i]
     m <- init_trajclust_model(curveset, model, seed=s)
-    em <- run_var_em(curveset, m, verbose=verbose)
+    em <- run_em(curveset, m, verbose=verbose)
     m <- em$model
     m$train_info$likelihood <- em$likelihood
     fit_models[[i]] <- m
