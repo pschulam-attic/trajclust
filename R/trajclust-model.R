@@ -15,7 +15,7 @@ new_trajclust_model <- function(G, P, basis, covariance, bmean=NULL, bcov=NULL)
 
   if (is.null(bcov))
     bcov <- diag(1e-10, 2)
-  
+
   model <- structure(list(), class="trajclust")
   model$num_groups <- G
   model$num_basis  <- P
@@ -37,7 +37,7 @@ new_trajclust_suffstats <- function(model)
 {
   G <- model$num_groups
   P <- model$num_basis
-  
+
   ss <- structure(list(), class="trajclust_ss")
   ss$theta_suffstats <- numeric(G)
   ss$beta_eta1 <- array(0, c(P, P, G))
@@ -50,12 +50,12 @@ new_trajclust_suffstats <- function(model)
 #'
 #' @param curveset A collection of curves.
 #' @param model A trajclust model.
-#' 
+#'
 #' @export
 init_trajclust_model <- function(curveset, model, seed)
 {
   set.seed(seed)
-  
+
   theta <- runif(model$num_groups)
   model$theta <- theta / sum(theta)
 
@@ -85,7 +85,7 @@ trajclust_mle <- function(model, ss)
 {
   alpha <- 1     # Pseudo-counts for group probabilities.
   fudge <- 1e-2  # Diagonal value to prevent singular matrices.
-  
+
   total_theta <- sum(ss$theta_suffstats) + alpha * model$num_groups
   model$theta <- (ss$theta_suffstats + alpha) / total_theta
 
@@ -159,9 +159,12 @@ bspline_basis <- function(xrange, nbasis, intercept, degree=3)
 #' @export
 diagonal_covariance <- function(noise)
 {
-  covariance <- function(x)
+  covariance <- function(x1, x2)
   {
-    diag(noise^2, length(x))
+    if (missing(x2))
+      diag(noise^2, length(x1))
+    else
+      matrix(0, length(x1), length(x2))
   }
 
   covariance
@@ -183,9 +186,12 @@ squared_exp_covariance <- function(amp, bw, noise)
     w <- w + ifelse(x == y, noise^2, 0)
   }
 
-  covariance <- function(x)
+  covariance <- function(x1, x2)
   {
-    outer(x, x, kernel)
+    if (missing(x2))
+      x2 <- x1
+
+    outer(x1, x2, kernel)
   }
 
   covariance
