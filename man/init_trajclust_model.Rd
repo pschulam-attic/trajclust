@@ -3,7 +3,7 @@
 \alias{init_trajclust_model}
 \title{Initialize a trajclust model using data.}
 \usage{
-init_trajclust_model(curveset, model)
+init_trajclust_model(curveset, model, seed)
 }
 \arguments{
 \item{curveset}{A collection of curves.}

@@ -6,7 +6,7 @@
 \title{trajclust.}
 \usage{
 trajclust(x, y, id, ngroups, xrange = range(x), nbasis, amp, bw, noise,
-  seed = 1)
+  ninit = 5, bmean = NULL, bcov = NULL, seed = 1, verbose = TRUE)
 }
 \arguments{
 \item{x}{A vector of measurement times.}
@@ -26,6 +26,8 @@ trajclust(x, y, id, ngroups, xrange = range(x), nbasis, amp, bw, noise,
 \item{bw}{The bandwidth of the correlation model.}
 
 \item{noise}{The observation standard deviation.}
+
+\item{ninit}{The number of random restarts to use.}
 
 \item{seed}{A random seed for reproducibility.}
 }

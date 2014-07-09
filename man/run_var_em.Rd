@@ -4,7 +4,7 @@
 \title{Run variational EM to fit the trajclust model. The model must have
 been initialized with \code{bmean} and \code{bcov}.}
 \usage{
-run_var_em(curveset, model, tol = 1e-08)
+run_var_em(curveset, model, tol = 1e-08, maxiter = 10000, verbose = TRUE)
 }
 \arguments{
 \item{curveset}{A collection of observed curves.}

@@ -3,10 +3,12 @@
 \alias{trajclust_inference}
 \title{Compute posterior for a curve.}
 \usage{
-trajclust_inference(X, y, K, model)
+trajclust_inference(X, x, y, K, model)
 }
 \arguments{
-\item{X}{A design matrix for the curve.}
+\item{X}{The design matrix for the curve.}
+
+\item{x}{The measurement times for the curve.}
 
 \item{y}{A response vector for the curve.}
 

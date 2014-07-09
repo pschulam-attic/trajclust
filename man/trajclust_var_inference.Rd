@@ -6,7 +6,7 @@
 trajclust_var_inference(X, x, y, K, model, tol = 1e-08)
 }
 \arguments{
-\item{X}{A design matrix for the curve.}
+\item{X}{The design matrix for the curve.}
 
 \item{x}{The measurement times for the curve.}
 
