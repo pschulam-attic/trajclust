@@ -166,21 +166,25 @@ trajclust_full_inference <- function(curveset, model)
 {
   likelihood <- 0
   z <- matrix(NA, curveset$num_curves, model$num_groups)
+  p <- length(model$bmean)
+  bmean <- array(NA, c(p, model$num_groups, curveset$num_curves))
   i <- 0
 
   for (curve in curveset$curves)
   {
     i <- i + 1
-    X <- model$basis(curve$x)
+    x <- curve$x
     y <- curve$y
+    X <- model$basis(x)
     K <- model$covariance(curve$x)
-    inf <- trajclust_inference(X, y, K, model)
+    inf <- trajclust_inference(X, x, y, K, model)
 
     z[i, ] <- inf$z
+    bmean[, , i] <- inf$bmean
     likelihood <- likelihood + inf$likelihood
   }
 
-  list(z=z, likelihood=likelihood)
+  list(z=z, bmean=bmean, likelihood=likelihood)
 }
 
 #' Use a trained model to infer groups and offsets and compute

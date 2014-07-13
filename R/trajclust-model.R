@@ -21,6 +21,7 @@ new_trajclust_model <- function(G, P, basis, covariance, bmean=NULL, bcov=NULL)
   model$num_basis  <- P
   model$theta <- numeric(G)
   model$beta <- matrix(NA, P, G)
+  model$beta_cov <- array(NA, c(P, P, G))
   model$basis <- basis
   model$covariance <- covariance
   model$bmean <- bmean
@@ -37,7 +38,6 @@ new_trajclust_suffstats <- function(model)
 {
   G <- model$num_groups
   P <- model$num_basis
-
   ss <- structure(list(), class="trajclust_ss")
   ss$theta_suffstats <- numeric(G)
   ss$beta_eta1 <- array(0, c(P, P, G))
@@ -94,6 +94,7 @@ trajclust_mle <- function(model, ss)
     eta1 <- ss$beta_eta1[, , i] + diag(fudge, model$num_basis)
     eta2 <- ss$beta_eta2[, i]
     model$beta[, i] <- solve(eta1, eta2)
+    model$beta_cov[, , i] <- solve(eta1)
   }
 
   model
@@ -129,8 +130,9 @@ polynomial_basis <- function(degree)
 #' @export
 bspline_basis <- function(xrange, nbasis, intercept, degree=3)
 {
-  from <- xrange[1]
-  to   <- xrange[2]
+  chunk_len <- diff(xrange) / nbasis
+  from <- xrange[1] - chunk_len
+  to   <- xrange[2] + chunk_len
 
   if (intercept)
       nknots <- nbasis - degree + 1
@@ -193,6 +195,5 @@ squared_exp_covariance <- function(amp, bw, noise)
 
     outer(x1, x2, kernel)
   }
-
   covariance
 }
