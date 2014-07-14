@@ -29,15 +29,19 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
     a <- hyper$amp[i]
     b <- hyper$bw[i]
     n <- hyper$noise[i]
+
     iter_str <- sprintf(iter_msg, i, nrow(hyper), 100 * i / nrow(hyper))
     msg(sprintf("%s Fitting with hyperparameters (amp=%.01f, bw=%.01f, noise=%.01f).", iter_str, a, b, n))
+
     covariance <- squared_exp_covariance(a, b, n)
     model <- new_trajclust_model(ngroups, nbasis, basis, covariance, bmean, bcov)
+
     model$train_info$xrange <- curveset$xrange
     model$train_info$yrange <- curveset$yrange
     model$train_info$amp <- a
     model$train_info$bw <- b
     model$train_info$noise <- n
+
     model <- init_trajclust_model(curveset, model)
     em <- run_em(curveset, model, tol=1e-1, verbose=FALSE)
     model <- em$model
@@ -50,6 +54,5 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
   likelihoods <- vapply(models, function(m) m$train_info$likelihood, numeric(1))
   model <- models[[which.max(likelihoods)]]
 
-  em <- run_em(curveset, model, verbose=verbose)
-  em$model
+  run_em(curveset, model, verbose=verbose)$model
 }
