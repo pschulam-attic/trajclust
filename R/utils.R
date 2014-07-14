@@ -7,7 +7,7 @@ logsumexp <- function(x)
 msg <- function(s)
 {
   time <- format(Sys.time(), "%X")
-  cat(sprintf("%s %s\n", time, s))
+  message(sprintf("%s %s", time, s))
 }
 
 mvn_entropy <- function(sigma)
