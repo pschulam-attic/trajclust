@@ -22,14 +22,14 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
   basis <- bspline_basis(xrange, nbasis, TRUE)
 
   hyper <- expand.grid(amp=amp, bw=bw, noise=noise)
-  iter_msg <- paste0("(%0", nchar(as.character(nrow(hyper))), "d)")
+  iter_msg <- paste0("(%0", nchar(as.character(nrow(hyper))), "d / %d : %4.1f%%)")
   models <- NULL
 
   for (i in 1:nrow(hyper)) {
     a <- hyper$amp[i]
     b <- hyper$bw[i]
     n <- hyper$noise[i]
-    iter_str <- sprintf(iter_msg, i)
+    iter_str <- sprintf(iter_msg, i, nrow(hyper), 100 * i / nrow(hyper))
     msg(sprintf("%s Fitting with hyperparameters (amp=%.01f, bw=%.01f, noise=%.01f).", iter_str, a, b, n))
     covariance <- squared_exp_covariance(a, b, n)
     model <- new_trajclust_model(ngroups, nbasis, basis, covariance, bmean, bcov)
