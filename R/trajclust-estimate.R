@@ -62,6 +62,7 @@ curve_e_step <- function(curve, model, ss)
   A <- t(X) %*% solve(K)
   eta1 <- A %*% X
   eta2 <- A %*% y
+  beta_cov_ss <- t(X) %*% solve(K + U%*%model$bcov%*%t(U)) %*% X
 
   for (i in 1:model$num_groups)
   {
@@ -69,6 +70,7 @@ curve_e_step <- function(curve, model, ss)
     ss$beta_eta1[, , i] <- ss$beta_eta1[, , i] + z[i] * eta1
     eta2 <- A %*% (y - U %*% bmean[, i])
     ss$beta_eta2[, i] <- ss$beta_eta2[, i] + z[i] * eta2
+    ss$beta_cov_ss[, , i] <- ss$beta_cov_ss[, , i] + z[i] * beta_cov_ss
   }
 
   list(ss=ss, likelihood=likelihood)

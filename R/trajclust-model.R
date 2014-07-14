@@ -42,6 +42,7 @@ new_trajclust_suffstats <- function(model)
   ss$theta_suffstats <- numeric(G)
   ss$beta_eta1 <- array(0, c(P, P, G))
   ss$beta_eta2 <- array(0, c(P, G))
+  ss$beta_cov_suffstats <- array(0, c(P, P, G))
 
   ss
 }
@@ -93,8 +94,9 @@ trajclust_mle <- function(model, ss)
   {
     eta1 <- ss$beta_eta1[, , i] + diag(fudge, model$num_basis)
     eta2 <- ss$beta_eta2[, i]
+    cov_ss <- ss$beta_cov_suffstats[, , i]
     model$beta[, i] <- solve(eta1, eta2)
-    model$beta_cov[, , i] <- solve(eta1)
+    model$beta_cov[, , i] <- solve(cov_ss)
   }
 
   model
