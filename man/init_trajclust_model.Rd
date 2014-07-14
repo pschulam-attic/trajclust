@@ -9,6 +9,8 @@ init_trajclust_model(curveset, model, seed)
 \item{curveset}{A collection of curves.}
 
 \item{model}{A trajclust model.}
+
+\item{seed}{A random seed for determining initial groups.}
 }
 \description{
 Initialize a trajclust model using data.

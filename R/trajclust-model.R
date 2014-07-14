@@ -51,6 +51,7 @@ new_trajclust_suffstats <- function(model)
 #'
 #' @param curveset A collection of curves.
 #' @param model A trajclust model.
+#' @param seed A random seed for determining initial groups.
 #'
 #' @export
 init_trajclust_model <- function(curveset, model, seed)

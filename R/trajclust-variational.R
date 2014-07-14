@@ -7,6 +7,9 @@
 #' @param curveset A collection of observed curves.
 #' @param model A trajclust model.
 #' @param tol Convergence tolerance.
+#' @param maxiter The maximum number of EM iterations.
+#' @param verbose Logical flag indicating whether to print convergence
+#' information.
 #'
 #' @export
 run_var_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE)

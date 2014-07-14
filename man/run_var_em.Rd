@@ -12,6 +12,11 @@ run_var_em(curveset, model, tol = 1e-08, maxiter = 10000, verbose = TRUE)
 \item{model}{A trajclust model.}
 
 \item{tol}{Convergence tolerance.}
+
+\item{maxiter}{The maximum number of EM iterations.}
+
+\item{verbose}{Logical flag indicating whether to print convergence
+information.}
 }
 \description{
 This procedure is used to estimate the model when individual curves

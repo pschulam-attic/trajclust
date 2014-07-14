@@ -9,8 +9,12 @@
 #' @param amp The amplitude of the correlation model.
 #' @param bw The bandwidth of the correlation model.
 #' @param noise The observation standard deviation.
+#' @param bmean Normal mean parameter for parametric random effects.
+#' @param bcov Normal covariance parameter for parametric random effects.
 #' @param ninit The number of random restarts to use.
 #' @param seed A random seed for reproducibility.
+#' @param verbose Logical flog indicating whether to print convergence
+#' information.
 #'
 #' @export
 trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,

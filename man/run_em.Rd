@@ -3,7 +3,7 @@
 \alias{run_em}
 \title{Run EM to fit the trajclust model.}
 \usage{
-run_em(curveset, model, tol = 1e-08)
+run_em(curveset, model, tol = 1e-08, maxiter = 10000, verbose = TRUE)
 }
 \arguments{
 \item{curveset}{A collection of observed curves.}
@@ -11,6 +11,11 @@ run_em(curveset, model, tol = 1e-08)
 \item{model}{A trajclust model.}
 
 \item{tol}{Convergence tolerance.}
+
+\item{maxiter}{The maximum number of EM iterations.}
+
+\item{verbose}{Logical flag indicating whether to print convergence
+information.}
 }
 \description{
 Run EM to fit the trajclust model.

@@ -3,6 +3,9 @@
 #' @param curveset A collection of observed curves.
 #' @param model A trajclust model.
 #' @param tol Convergence tolerance.
+#' @param maxiter The maximum number of EM iterations.
+#' @param verbose Logical flag indicating whether to print convergence
+#' information.
 #'
 #' @export
 run_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE)
@@ -70,7 +73,7 @@ curve_e_step <- function(curve, model, ss)
     ss$beta_eta1[, , i] <- ss$beta_eta1[, , i] + z[i] * eta1
     eta2 <- A %*% (y - U %*% bmean[, i])
     ss$beta_eta2[, i] <- ss$beta_eta2[, i] + z[i] * eta2
-    ss$beta_cov_ss[, , i] <- ss$beta_cov_ss[, , i] + z[i] * beta_cov_ss
+    ss$beta_cov_suffstats[, , i] <- ss$beta_cov_suffstats[, , i] + z[i] * beta_cov_ss
   }
 
   list(ss=ss, likelihood=likelihood)

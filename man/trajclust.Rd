@@ -27,9 +27,16 @@ trajclust(x, y, id, ngroups, xrange = range(x), nbasis, amp, bw, noise,
 
 \item{noise}{The observation standard deviation.}
 
+\item{bmean}{Normal mean parameter for parametric random effects.}
+
+\item{bcov}{Normal covariance parameter for parametric random effects.}
+
 \item{ninit}{The number of random restarts to use.}
 
 \item{seed}{A random seed for reproducibility.}
+
+\item{verbose}{Logical flog indicating whether to print convergence
+information.}
 }
 \description{
 trajclust.
