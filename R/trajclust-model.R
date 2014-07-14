@@ -51,13 +51,10 @@ new_trajclust_suffstats <- function(model)
 #'
 #' @param curveset A collection of curves.
 #' @param model A trajclust model.
-#' @param seed A random seed for determining initial groups.
 #'
 #' @export
-init_trajclust_model <- function(curveset, model, seed)
+init_trajclust_model <- function(curveset, model)
 {
-  set.seed(seed)
-
   theta <- runif(model$num_groups)
   model$theta <- theta / sum(theta)
 

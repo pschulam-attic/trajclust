@@ -12,18 +12,14 @@
 #' @param bmean Normal mean parameter for parametric random effects.
 #' @param bcov Normal covariance parameter for parametric random effects.
 #' @param ninit The number of random restarts to use.
-#' @param seed A random seed for reproducibility.
 #' @param verbose Logical flog indicating whether to print convergence
 #' information.
 #'
 #' @export
 trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
                       amp, bw, noise, ninit=5, bmean=NULL, bcov=NULL,
-                      seed=1, verbose=TRUE)
+                      verbose=TRUE)
 {
-  set.seed(seed)
-  init_seeds <- sample(100, ninit, replace=FALSE)
-
   curveset <- make_curveset(x, y, id)
   basis <- bspline_basis(xrange, nbasis, TRUE)
   covariance <- squared_exp_covariance(amp, bw, noise)
@@ -33,23 +29,12 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
   model$train_info$xrange <- curveset$xrange
   model$train_info$yrange <- curveset$yrange
 
-  fit_models <- vector("list", ninit)
-  likelihoods <- numeric(ninit)
+  model <- init_trajclust_model(curveset, model)
+  em <- run_em(curveset, m, verbose=verbose)
+  model <- em$model
+  model$train_info$likelihood <- em$likelihood
 
-  for (i in 1:ninit)
-  {
-    if (verbose) cat(banner(i), "\n")
-
-    s <- init_seeds[i]
-    m <- init_trajclust_model(curveset, model, seed=s)
-    em <- run_em(curveset, m, verbose=verbose)
-    m <- em$model
-    m$train_info$likelihood <- em$likelihood
-    fit_models[[i]] <- m
-  }
-
-  best <- which.max(likelihoods)
-  fit_models[[best]]
+  model
 }
 
 banner <- function(iter)
