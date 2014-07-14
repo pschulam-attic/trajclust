@@ -6,7 +6,7 @@
 \title{trajclust.}
 \usage{
 trajclust(x, y, id, ngroups, xrange = range(x), nbasis, amp, bw, noise,
-  ninit = 5, bmean = NULL, bcov = NULL, seed = 1, verbose = TRUE)
+  bmean = NULL, bcov = NULL, verbose = TRUE)
 }
 \arguments{
 \item{x}{A vector of measurement times.}
@@ -30,10 +30,6 @@ trajclust(x, y, id, ngroups, xrange = range(x), nbasis, amp, bw, noise,
 \item{bmean}{Normal mean parameter for parametric random effects.}
 
 \item{bcov}{Normal covariance parameter for parametric random effects.}
-
-\item{ninit}{The number of random restarts to use.}
-
-\item{seed}{A random seed for reproducibility.}
 
 \item{verbose}{Logical flog indicating whether to print convergence
 information.}

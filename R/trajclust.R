@@ -11,14 +11,12 @@
 #' @param noise The observation standard deviation.
 #' @param bmean Normal mean parameter for parametric random effects.
 #' @param bcov Normal covariance parameter for parametric random effects.
-#' @param ninit The number of random restarts to use.
 #' @param verbose Logical flog indicating whether to print convergence
 #' information.
 #'
 #' @export
 trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
-                      amp, bw, noise, ninit=5, bmean=NULL, bcov=NULL,
-                      verbose=TRUE)
+                      amp, bw, noise, bmean=NULL, bcov=NULL, verbose=TRUE)
 {
   curveset <- make_curveset(x, y, id)
   basis <- bspline_basis(xrange, nbasis, TRUE)
@@ -30,7 +28,7 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
   model$train_info$yrange <- curveset$yrange
 
   model <- init_trajclust_model(curveset, model)
-  em <- run_em(curveset, m, verbose=verbose)
+  em <- run_em(curveset, model, verbose=verbose)
   model <- em$model
   model$train_info$likelihood <- em$likelihood
 
