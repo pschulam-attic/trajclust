@@ -16,8 +16,8 @@
 #'
 #' @export
 trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
-                      amp, bw, noise, bmean=NULL, bcov=NULL, verbose=TRUE)
-{
+                      amp, bw, noise, bmean=NULL, bcov=NULL, verbose=TRUE) {
+
   curveset <- make_curveset(x, y, id)
   basis <- bspline_basis(xrange, nbasis, TRUE)
 

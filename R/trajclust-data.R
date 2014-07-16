@@ -6,19 +6,16 @@
 #' \code{y}.
 #'
 #' @export
-make_curveset <- function(x, y, curve_id)
-{
+make_curveset <- function(x, y, curve_id) {
   curve_data <- data.frame(x=x, y=y, id=curve_id)
   curveset <- structure(list(), class="curveset")
   curveset$curves <- by(curve_data, curve_data$id, make_curve)
   curveset$num_curves <- length(curveset$curves)
-  curveset$num_points <-
-      sum(vapply(curveset$curves, "[[", integer(1), "num_points"))
+  curveset$num_points <- sum(vapply(curveset$curves, "[[", integer(1), "num_points"))
   curveset$xrange <- range(x)
   curveset$yrange <- range(y)
   curveset
 }
-
 
 #' Create an individual curve from a data.frame.
 #'
@@ -26,8 +23,7 @@ make_curveset <- function(x, y, curve_id)
 #' \code{x}, measurements \code{y}, and a curve ID \code{id}.
 #'
 #' @export
-make_curve <- function(curve_data)
-{
+make_curve <- function(curve_data) {
   curve <- structure(list(), class="curve")
   curve$id <- curve_data$id[1]
   curve$x  <- curve_data$x

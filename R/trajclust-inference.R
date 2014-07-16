@@ -7,8 +7,7 @@
 #' @param model A trajclust model.
 #'
 #' @export
-trajclust_inference <- function(X, x, y, K, model)
-{
+trajclust_inference <- function(X, x, y, K, model) {
   U <- cbind(1, x)
   Ki <- solve(K)
 
@@ -20,8 +19,7 @@ trajclust_inference <- function(X, x, y, K, model)
   res_mean <- as.numeric(U %*% model$bmean)
   res_cov <- K + U %*% model$bcov %*% t(U)
 
-  for (i in 1:length(z))
-  {
+  for (i in 1:length(z)) {
     yhat <- as.numeric(X %*% model$beta[, i])
     z[i] <- log(model$theta[i])
     z[i] <- z[i] + mvtnorm::dmvnorm(y - yhat, res_mean, res_cov, log=TRUE)
@@ -39,16 +37,14 @@ trajclust_inference <- function(X, x, y, K, model)
 #' @param model A trained trajclust model.
 #'
 #' @export
-trajclust_full_inference <- function(curveset, model)
-{
+trajclust_full_inference <- function(curveset, model) {
   likelihood <- 0
   z <- matrix(NA, curveset$num_curves, model$num_groups)
   p <- length(model$bmean)
   bmean <- array(NA, c(p, model$num_groups, curveset$num_curves))
   i <- 0
 
-  for (curve in curveset$curves)
-  {
+  for (curve in curveset$curves) {
     i <- i + 1
     x <- curve$x
     y <- curve$y

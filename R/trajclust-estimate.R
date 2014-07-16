@@ -8,35 +8,30 @@
 #' information.
 #'
 #' @export
-run_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE)
-{
+run_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE) {
   iter <- 0
   convergence <- 1
   likelihood_old <- 0
 
-  while (convergence > tol & iter < maxiter)
-  {
+  while (convergence > tol & iter < maxiter) {
     iter <- iter + 1
 
     likelihood <- 0
     ss <- new_trajclust_suffstats(model)
 
-    for (curve in curveset$curves)
-    {
+    for (curve in curveset$curves) {
       estep <- curve_e_step(curve, model, ss)
       ss <- estep$ss
       likelihood <- likelihood + estep$likelihood
     }
 
     model <- trajclust_mle(model, ss)
-    ## capture.output(print(model), file=sprintf("trajclust-%03d.txt", iter))
 
     convergence <- abs((likelihood - likelihood_old) / likelihood_old)
     likelihood_old <- likelihood
 
     if (verbose)
-      msg(sprintf("likelihood=%.2f, convergence=%.8f",
-                  likelihood, convergence))
+      msg(sprintf("likelihood=%.2f, convergence=%.8f", likelihood, convergence))
   }
 
   list(model=model, likelihood=likelihood)
@@ -49,8 +44,7 @@ run_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE)
 #' @param ss A trajclust sufficient statistics container.
 #'
 #' @export
-curve_e_step <- function(curve, model, ss)
-{
+curve_e_step <- function(curve, model, ss) {
   x <- curve$x
   y <- curve$y
   X <- model$basis(curve$x)
@@ -67,8 +61,7 @@ curve_e_step <- function(curve, model, ss)
   eta2 <- A %*% y
   beta_cov_ss <- t(X) %*% solve(K + U%*%model$bcov%*%t(U)) %*% X
 
-  for (i in 1:model$num_groups)
-  {
+  for (i in 1:model$num_groups) {
     ss$theta_suffstats[i] <- ss$theta_suffstats[i] + z[i]
     ss$beta_eta1[, , i] <- ss$beta_eta1[, , i] + z[i] * eta1
     eta2 <- A %*% (y - U %*% bmean[, i])

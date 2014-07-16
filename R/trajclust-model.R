@@ -8,8 +8,7 @@
 #' @param bcov Individual offset prior cov.
 #'
 #' @export
-new_trajclust_model <- function(G, P, basis, covariance, bmean=NULL, bcov=NULL)
-{
+new_trajclust_model <- function(G, P, basis, covariance, bmean=NULL, bcov=NULL) {
   if (is.null(bmean))
     bmean <- rep(0, 2)
 
@@ -34,8 +33,7 @@ new_trajclust_model <- function(G, P, basis, covariance, bmean=NULL, bcov=NULL)
 #' @param model A trajclust model.
 #'
 #' @export
-new_trajclust_suffstats <- function(model)
-{
+new_trajclust_suffstats <- function(model) {
   G <- model$num_groups
   P <- model$num_basis
   ss <- structure(list(), class="trajclust_ss")
@@ -53,15 +51,13 @@ new_trajclust_suffstats <- function(model)
 #' @param model A trajclust model.
 #'
 #' @export
-init_trajclust_model <- function(curveset, model)
-{
+init_trajclust_model <- function(curveset, model) {
   theta <- runif(model$num_groups)
   model$theta <- theta / sum(theta)
 
   init_groups <- sample(model$num_groups, curveset$num_curves, TRUE)
 
-  for (i in 1:model$num_groups)
-  {
+  for (i in 1:model$num_groups) {
     curves <- curveset$curves[init_groups == i]
     x <- do.call("c", lapply(curves, "[[", "x"))
     y <- do.call("c", lapply(curves, "[[", "y"))
@@ -80,16 +76,14 @@ init_trajclust_model <- function(curveset, model)
 #' @param ss A trajclust sufficient statistics container.
 #'
 #' @export
-trajclust_mle <- function(model, ss)
-{
+trajclust_mle <- function(model, ss) {
   alpha <- 1     # Pseudo-counts for group probabilities.
   fudge <- 1e-2  # Diagonal value to prevent singular matrices.
 
   total_theta <- sum(ss$theta_suffstats) + alpha * model$num_groups
   model$theta <- (ss$theta_suffstats + alpha) / total_theta
 
-  for (i in 1:model$num_groups)
-  {
+  for (i in 1:model$num_groups) {
     eta1 <- ss$beta_eta1[, , i] + diag(fudge, model$num_basis)
     eta2 <- ss$beta_eta2[, i]
     cov_ss <- ss$beta_cov_suffstats[, , i]
@@ -105,12 +99,11 @@ trajclust_mle <- function(model, ss)
 #' @param degree Degree of the polynomial.
 #'
 #' @export
-polynomial_basis <- function(degree)
-{
-  basis <- function(x)
-  {
+polynomial_basis <- function(degree) {
+  basis <- function(x) {
     powers <- seq(0, degree)
     X <- matrix(0, length(x), length(powers))
+
     for (i in 1:length(powers))
         X[, i] <- x^powers[i]
 
@@ -128,8 +121,7 @@ polynomial_basis <- function(degree)
 #' @param degree The degree of the polynomials.
 #'
 #' @export
-bspline_basis <- function(xrange, nbasis, intercept, degree=3)
-{
+bspline_basis <- function(xrange, nbasis, intercept, degree=3) {
   chunk_len <- diff(xrange) / nbasis
   from <- xrange[1] - chunk_len
   to   <- xrange[2] + chunk_len
@@ -143,11 +135,8 @@ bspline_basis <- function(xrange, nbasis, intercept, degree=3)
   boundary <- knots[ c(1, nknots)]
   interior <- knots[-c(1, nknots)]
 
-  basis <- function(x)
-  {
-    X <- splines::bs(x, degree=degree, knots=interior,
-                     Boundary.knots=boundary, intercept=intercept)
-
+  basis <- function(x) {
+    X <- splines::bs(x, degree=degree, knots=interior, Boundary.knots=boundary, intercept=intercept)
     unname(X)
   }
 
@@ -159,10 +148,8 @@ bspline_basis <- function(xrange, nbasis, intercept, degree=3)
 #' @param noise The square root of the measurement variance.
 #'
 #' @export
-diagonal_covariance <- function(noise)
-{
-  covariance <- function(x1, x2)
-  {
+diagonal_covariance <- function(noise) {
+  covariance <- function(x1, x2) {
     if (missing(x2))
       diag(noise^2, length(x1))
     else
@@ -179,21 +166,19 @@ diagonal_covariance <- function(noise)
 #' @param noise The amount of observation noise.
 #'
 #' @export
-squared_exp_covariance <- function(amp, bw, noise)
-{
-  kernel <- function(x, y)
-  {
+squared_exp_covariance <- function(amp, bw, noise) {
+  kernel <- function(x, y) {
     d <- abs(x - y)
     w <- amp^2 * exp(-1/2 * d^2 / bw^2)
     w <- w + ifelse(x == y, noise^2, 0)
   }
 
-  covariance <- function(x1, x2)
-  {
+  covariance <- function(x1, x2) {
     if (missing(x2))
       x2 <- x1
 
     outer(x1, x2, kernel)
   }
+
   covariance
 }

@@ -1,10 +1,9 @@
 #' @export
-plot.trajclust <- function(x, ...)
-{
+plot.trajclust <- function(x, ...) {
   model <- x
   xrange <- model$train_info$xrange
   yrange <- model$train_info$yrange
-  yextra <- 1/4 * diff(yrange)  
+  yextra <- 1/4 * diff(yrange)
 
   n <- 100
   x <- seq(xrange[1], xrange[2], length=n)
