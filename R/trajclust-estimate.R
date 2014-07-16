@@ -8,7 +8,7 @@
 #' information.
 #'
 #' @export
-run_em <- function(curveset, model, tol=1e-8, maxiter=1e4, verbose=TRUE) {
+run_em <- function(curveset, model, tol=1e-8, maxiter=1e3, verbose=TRUE) {
   iter <- 0
   convergence <- 1
   likelihood_old <- 0
