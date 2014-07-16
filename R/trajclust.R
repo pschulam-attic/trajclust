@@ -19,7 +19,7 @@
 #' @export
 trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
                       amp, bw, noise, bmean=NULL, bcov=NULL,
-                      verbose=TRUE, model=NULL) {
+                      verbose=TRUE, maxiter=1e3, model=NULL) {
 
   curveset <- make_curveset(x, y, id)
 
@@ -48,7 +48,7 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
       model$train_info$noise <- n
 
       model <- init_trajclust_model(curveset, model)
-      em <- run_em(curveset, model, tol=1e-1, verbose=FALSE)
+      em <- run_em(curveset, model, tol=1e-1, maxiter=maxiter, verbose=FALSE)
       model <- em$model
       model$train_info$likelihood <- em$likelihood
       models <- c(models, list(model))
@@ -60,5 +60,5 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
     model <- models[[which.max(likelihoods)]]
   }
 
-  run_em(curveset, model, verbose=verbose)$model
+  run_em(curveset, model, maxiter=maxiter, verbose=verbose)$model
 }
