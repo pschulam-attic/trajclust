@@ -42,6 +42,7 @@ trajclust_full_inference <- function(curveset, model) {
   z <- matrix(NA, curveset$num_curves, model$num_groups)
   p <- length(model$bmean)
   bmean <- array(NA, c(p, model$num_groups, curveset$num_curves))
+  bcov <- array(NA, c(p, p, curveset$num_curves))
   i <- 0
 
   for (curve in curveset$curves) {
@@ -49,13 +50,14 @@ trajclust_full_inference <- function(curveset, model) {
     x <- curve$x
     y <- curve$y
     X <- model$basis(x)
-    K <- model$covariance(curve$x)
+    K <- model$covariance(curve$x) + diag(model$sigma^2, length(x))
     inf <- trajclust_inference(X, x, y, K, model)
 
     z[i, ] <- inf$z
     bmean[, , i] <- inf$bmean
+    bcov[, , i] <- inf$bcov
     likelihood <- likelihood + inf$likelihood
   }
 
-  list(z=z, bmean=bmean, likelihood=likelihood)
+  list(z=z, bmean=bmean, bcov=bcov, likelihood=likelihood)
 }

@@ -3,7 +3,7 @@
 \alias{squared_exp_covariance}
 \title{Create a new squared exponential covariance function.}
 \usage{
-squared_exp_covariance(amp, bw, noise)
+squared_exp_covariance(amp, bw)
 }
 \arguments{
 \item{amp}{The amplitude of the kernel.}

@@ -25,7 +25,7 @@ run_em <- function(curveset, model, tol=1e-8, maxiter=1e3, verbose=TRUE) {
       likelihood <- likelihood + estep$likelihood
     }
 
-    model <- trajclust_mle(model, ss)
+    model <- trajclust_mle(model, ss, curveset)
 
     convergence <- abs((likelihood - likelihood_old) / likelihood_old)
     likelihood_old <- likelihood
@@ -49,7 +49,7 @@ curve_e_step <- function(curve, model, ss) {
   y <- curve$y
   X <- model$basis(curve$x)
   U <- cbind(1, x)
-  K <- model$covariance(curve$x)
+  K <- model$covariance(curve$x) + diag(model$sigma^2, length(x))
   inf <- trajclust_inference(X, x, y, K, model)
   likelihood <- inf$likelihood
 

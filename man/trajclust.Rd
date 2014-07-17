@@ -5,8 +5,8 @@
 \alias{trajclust-package}
 \title{trajclust.}
 \usage{
-trajclust(x, y, id, ngroups, xrange = range(x), nbasis, amp, bw, noise,
-  bmean = NULL, bcov = NULL, verbose = TRUE)
+trajclust(x, y, id, ngroups, xrange = range(x), nbasis, amb, bw,
+  bcov = NULL, verbose = TRUE, maxiter = 1000, model = NULL)
 }
 \arguments{
 \item{x}{A vector of measurement times.}
@@ -25,14 +25,13 @@ trajclust(x, y, id, ngroups, xrange = range(x), nbasis, amp, bw, noise,
 
 \item{bw}{The bandwidth of the correlation model.}
 
-\item{noise}{The observation standard deviation.}
-
-\item{bmean}{Normal mean parameter for parametric random effects.}
-
-\item{bcov}{Normal covariance parameter for parametric random effects.}
+\item{bcov}{Initial normal covariance parameter for parametric random effects.}
 
 \item{verbose}{Logical flog indicating whether to print convergence
 information.}
+
+\item{model}{Continue to fit this model. Providing this argument
+causes most of the others to be ignored.}
 }
 \description{
 trajclust.

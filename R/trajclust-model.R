@@ -4,13 +4,11 @@
 #' @param P The number of basis functions.
 #' @param basis A function to compute design matrices.
 #' @param covariance A function to compute covariance matrices.
-#' @param bmean Individual offset prior mean.
-#' @param bcov Individual offset prior cov.
+#' @param bcov Individual offset initial covariance.
 #'
 #' @export
-new_trajclust_model <- function(G, P, basis, covariance, bmean=NULL, bcov=NULL) {
-  if (is.null(bmean))
-    bmean <- rep(0, 2)
+new_trajclust_model <- function(G, P, basis, covariance, bcov=NULL) {
+  bmean <- rep(0, 2)
 
   if (is.null(bcov))
     bcov <- diag(1e-10, 2)
@@ -25,6 +23,7 @@ new_trajclust_model <- function(G, P, basis, covariance, bmean=NULL, bcov=NULL) 
   model$covariance <- covariance
   model$bmean <- bmean
   model$bcov <- bcov
+  model$sigma <- 1
   model
 }
 
@@ -77,9 +76,11 @@ init_trajclust_model <- function(curveset, model) {
 #' @param ss A trajclust sufficient statistics container.
 #'
 #' @export
-trajclust_mle <- function(model, ss) {
+trajclust_mle <- function(model, ss, curveset) {
   alpha <- 1     # Pseudo-counts for group probabilities.
   fudge <- 1e-2  # Diagonal value to prevent singular matrices.
+
+  inf <- trajclust_full_inference(curveset, model)
 
   total_theta <- sum(ss$theta_suffstats) + alpha * model$num_groups
   model$theta <- (ss$theta_suffstats + alpha) / total_theta
@@ -94,6 +95,33 @@ trajclust_mle <- function(model, ss) {
 
   model$bcov <- ss$bcov_suffstats / sum(ss$theta_suffstats)
 
+  sigmasq <- 0
+  n <- 0
+
+  for (i in 1:length(curveset$curves)) {
+    curve <- curveset$curves[[i]]
+    x <- curve$x
+    y <- curve$y
+    X <- model$basis(x)
+    U <- cbind(1, x)
+
+    z <- inf$z[i, ]
+    bmean <- inf$bmean[, , i]
+    bcov <- inf$bcov[, , i]
+
+    sigmasq <- sigmasq - sum(diag(model$covariance(x, x)))
+
+    for (j in 1:model$num_groups) {
+      r <- as.numeric(y - X %*% model$beta[, j])
+      sigmasq <- sigmasq + z[j] * sum(r * r)
+      sigmasq <- sigmasq + z[j] * sum(diag(U %*% (bcov + outer(bmean[, j], bmean[, j])) %*% t(U)))
+      sigmasq <- sigmasq - 2 * z[j] * sum((U %*% bmean[, j]) * r)
+    }
+
+    n <- n + length(x)
+  }
+
+  model$sigma <- sqrt(sigmasq / n)
   model
 }
 
@@ -169,11 +197,11 @@ diagonal_covariance <- function(noise) {
 #' @param noise The amount of observation noise.
 #'
 #' @export
-squared_exp_covariance <- function(amp, bw, noise) {
+squared_exp_covariance <- function(amp, bw) {
   kernel <- function(x, y) {
     d <- abs(x - y)
     w <- amp^2 * exp(-1/2 * d^2 / bw^2)
-    w <- w + ifelse(x == y, noise^2, 0)
+    w
   }
 
   covariance <- function(x1, x2) {

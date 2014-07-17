@@ -3,7 +3,7 @@
 \alias{trajclust_mle}
 \title{Compute maximum likelihood estimate of trajclust model.}
 \usage{
-trajclust_mle(model, ss)
+trajclust_mle(model, ss, curveset)
 }
 \arguments{
 \item{model}{A trajclust model.}

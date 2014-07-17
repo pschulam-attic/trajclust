@@ -8,25 +8,22 @@
 #' @param nbasis The number of basis functions to use.
 #' @param amp The amplitude of the correlation model.
 #' @param bw The bandwidth of the correlation model.
-#' @param noise The observation standard deviation.
-#' @param bmean Normal mean parameter for parametric random effects.
-#' @param bcov Normal covariance parameter for parametric random effects.
+#' @param bcov Initial normal covariance parameter for parametric random effects.
 #' @param verbose Logical flog indicating whether to print convergence
 #' information.
 #' @param model Continue to fit this model. Providing this argument
 #' causes most of the others to be ignored.
 #'
 #' @export
-trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
-                      amp, bw, noise, bmean=NULL, bcov=NULL,
-                      verbose=TRUE, maxiter=1e3, model=NULL) {
+trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis, amb, bw,
+                      bcov=NULL, verbose=TRUE, maxiter=1e3, model=NULL) {
 
   curveset <- make_curveset(x, y, id)
 
   if (is.null(model)) {
     basis <- bspline_basis(xrange, nbasis, TRUE)
 
-    hyper <- expand.grid(amp=amp, bw=bw, noise=noise)
+    hyper <- expand.grid(amp=amp, bw=bw)
     iter_msg <- paste0("(%0", nchar(as.character(nrow(hyper))), "d / %d : %4.1f%%)")
     models <- NULL
 
@@ -38,8 +35,8 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
       iter_str <- sprintf(iter_msg, i, nrow(hyper), 100 * i / nrow(hyper))
       msg(sprintf("%s Fitting with hyperparameters (amp=%.01f, bw=%.01f, noise=%.01f).", iter_str, a, b, n))
 
-      covariance <- squared_exp_covariance(a, b, n)
-      model <- new_trajclust_model(ngroups, nbasis, basis, covariance, bmean, bcov)
+      covariance <- squared_exp_covariance(a, b)
+      model <- new_trajclust_model(ngroups, nbasis, basis, covariance, bcov)
 
       model$train_info$xrange <- curveset$xrange
       model$train_info$yrange <- curveset$yrange
@@ -60,5 +57,5 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
     model <- models[[which.max(likelihoods)]]
   }
 
-  run_em(curveset, model, tol=1e-5, maxiter=maxiter, verbose=verbose)$model
+  run_em(curveset, model, maxiter=maxiter, verbose=verbose)$model
 }
