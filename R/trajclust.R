@@ -60,5 +60,5 @@ trajclust <- function(x, y, id, ngroups, xrange=range(x), nbasis,
     model <- models[[which.max(likelihoods)]]
   }
 
-  run_em(curveset, model, maxiter=maxiter, verbose=verbose)$model
+  run_em(curveset, model, tol=1e-5, maxiter=maxiter, verbose=verbose)$model
 }

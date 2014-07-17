@@ -28,7 +28,7 @@ trajclust_inference <- function(X, x, y, K, model) {
 
   likelihood <- logsumexp(z)
   z <- exp(z - likelihood)
-  list(z=z, bmean=bmean, likelihood=likelihood)
+  list(z=z, bmean=bmean, bcov=bcov, likelihood=likelihood)
 }
 
 #' Use a trained model to infer groups and compute likelihood.
