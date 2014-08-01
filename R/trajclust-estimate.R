@@ -34,7 +34,12 @@ run_em <- function(curveset, model, tol=1e-8, maxiter=1e3, verbose=TRUE) {
       msg(sprintf("likelihood=%.2f, convergence=%.8f", likelihood, convergence))
   }
 
-  list(model=model, likelihood=likelihood)
+  nparam <- length(model$theta) + length(model$beta) + length(model$bmean) + length(model$bcov) + 3
+  aic <- -2 * likelihood + 2 * nparam
+  aic_c <- aic + 2 * nparam * (nparam + 1) / (curveset$num_points - nparam - 1)
+  bic <- -2 * likelihood + nparam * log(curveset$num_points)
+
+  list(model=model, likelihood=likelihood, aic=aic, aic_c=aic_c, bic=bic)
 }
 
 #' Compute sufficient statistics and likelihood.
