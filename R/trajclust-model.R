@@ -89,7 +89,7 @@ trajclust_mle <- function(model, ss) {
     eta2 <- ss$beta_eta2[, i]
     cov_ss <- ss$beta_cov_suffstats[, , i]
     model$beta[, i] <- solve(eta1, eta2)
-    model$beta_cov[, , i] <- solve(cov_ss)
+    model$beta_cov[, , i] <- solve(cov_ss + diag(fudge, model$num_basis))
   }
 
   model$bcov <- ss$bcov_suffstats / sum(ss$theta_suffstats)
